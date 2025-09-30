@@ -304,6 +304,7 @@ show_help() {
     echo "  logs      - Show application logs"
     echo "  build     - Build frontend only"
     echo "  deploy    - Full deployment (install deps, build, start)"
+    echo "  password  - Change admin password"
     echo "  systemd   - Generate systemd service file"
     echo "  help      - Show this help"
     echo ""
