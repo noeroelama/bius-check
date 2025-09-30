@@ -934,17 +934,27 @@ function App() {
     if (token) {
       setIsAdminLoggedIn(true);
     }
+    
+    // Check if URL path is /admin to show admin interface
+    const currentPath = window.location.pathname;
+    if (currentPath === '/admin') {
+      setCurrentView('admin');
+    }
   }, []);
 
   const handleAdminLogin = () => {
     setIsAdminLoggedIn(true);
     setCurrentView('admin');
+    // Update URL to /admin without page reload
+    window.history.pushState({}, '', '/admin');
   };
 
   const handleAdminLogout = () => {
     localStorage.removeItem('admin_token');
     setIsAdminLoggedIn(false);
     setCurrentView('public');
+    // Redirect to home page
+    window.history.pushState({}, '', '/');
     toast.success('Berhasil logout');
   };
 
@@ -956,35 +966,24 @@ function App() {
             path="/"
             element={
               <div>
-                {/* Navigation */}
-                <div className="fixed top-4 right-4 z-50">
-                  {currentView === 'public' ? (
-                    <Button
-                      onClick={() => setCurrentView('admin')}
-                      variant="outline"
-                      data-testid="go-to-admin-btn"
-                      className="bg-white/90 backdrop-blur-sm border-gray-300 text-gray-700 hover:bg-gray-50 shadow-lg"
-                    >
-                      Admin
-                    </Button>
-                  ) : !isAdminLoggedIn ? (
-                    <Button
-                      onClick={() => setCurrentView('public')}
-                      variant="outline"
-                      data-testid="back-to-public-btn"
-                      className="bg-white/90 backdrop-blur-sm border-gray-300 text-gray-700 hover:bg-gray-50 shadow-lg"
-                    >
-                      Kembali
-                    </Button>
-                  ) : null}
-                </div>
-
                 {/* Main Content */}
                 {currentView === 'public' && <StatusChecker />}
                 {currentView === 'admin' && !isAdminLoggedIn && (
                   <AdminLogin onLogin={handleAdminLogin} />
                 )}
                 {currentView === 'admin' && isAdminLoggedIn && (
+                  <AdminDashboard onLogout={handleAdminLogout} />
+                )}
+              </div>
+            }
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <div>
+                {!isAdminLoggedIn ? (
+                  <AdminLogin onLogin={handleAdminLogin} />
+                ) : (
                   <AdminDashboard onLogout={handleAdminLogout} />
                 )}
               </div>
