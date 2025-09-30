@@ -487,3 +487,24 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+# Serve React static files
+if FRONTEND_BUILD_DIR.exists():
+    # Mount static files (CSS, JS, images, etc.)
+    app.mount("/static", StaticFiles(directory=str(FRONTEND_BUILD_DIR / "static")), name="static")
+    
+    # Serve React app for all non-API routes
+    @app.get("/{catchall:path}")
+    async def serve_react_app(catchall: str):
+        # Serve static files directly
+        if catchall.startswith(("static/", "manifest.json", "favicon.ico", "logo")):
+            file_path = FRONTEND_BUILD_DIR / catchall
+            if file_path.exists():
+                return FileResponse(file_path)
+        
+        # For all other routes, serve React's index.html
+        return FileResponse(str(FRONTEND_BUILD_DIR / "index.html"))
+else:
+    @app.get("/")
+    async def frontend_not_built():
+        return {"message": "Frontend not built yet. Run 'npm run build' in frontend directory."}
