@@ -665,6 +665,177 @@ const AdminDashboard = ({ onLogout }) => {
         </DialogContent>
       </Dialog>
 
+      {/* Add Application Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Tambah Aplikasi Baru</DialogTitle>
+            <DialogDescription>
+              Masukkan data aplikasi beasiswa baru
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">NIM *</label>
+                <Input
+                  placeholder="13523001"
+                  value={newApplication.nim}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, nim: e.target.value }))}
+                  data-testid="add-nim-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Email *</label>
+                <Input
+                  type="email"
+                  placeholder="email@students.itb.ac.id"
+                  value={newApplication.email}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, email: e.target.value }))}
+                  data-testid="add-email-input"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Nama Lengkap *</label>
+                <Input
+                  placeholder="Nama lengkap mahasiswa"
+                  value={newApplication.nama_lengkap}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, nama_lengkap: e.target.value }))}
+                  data-testid="add-name-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Nomor Telepon</label>
+                <Input
+                  placeholder="081234567890"
+                  value={newApplication.nomor_telepon}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, nomor_telepon: e.target.value }))}
+                  data-testid="add-phone-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">IPK</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4"
+                  placeholder="3.75"
+                  value={newApplication.ipk}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, ipk: e.target.value }))}
+                  data-testid="add-ipk-input"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Alamat</label>
+                <Input
+                  placeholder="Alamat lengkap"
+                  value={newApplication.alamat}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, alamat: e.target.value }))}
+                  data-testid="add-address-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Penghasilan Keluarga</label>
+                <Input
+                  type="number"
+                  placeholder="5000000"
+                  value={newApplication.penghasilan_keluarga}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, penghasilan_keluarga: e.target.value }))}
+                  data-testid="add-income-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
+                <Select
+                  value={newApplication.status}
+                  onValueChange={(value) => setNewApplication(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger data-testid="add-status-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Dalam Review">Dalam Review</SelectItem>
+                    <SelectItem value="Diterima">Diterima</SelectItem>
+                    <SelectItem value="Ditolak">Ditolak</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Essay</label>
+                <Textarea
+                  placeholder="Essay motivasi beasiswa"
+                  value={newApplication.essay}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, essay: e.target.value }))}
+                  data-testid="add-essay-textarea"
+                  className="min-h-[80px]"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Dokumen Pendukung</label>
+                <Input
+                  placeholder="KTM, KK, Slip Gaji"
+                  value={newApplication.dokumen_pendukung}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, dokumen_pendukung: e.target.value }))}
+                  data-testid="add-documents-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Rekomendasi</label>
+                <Input
+                  placeholder="Surat rekomendasi"
+                  value={newApplication.rekomendasi}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, rekomendasi: e.target.value }))}
+                  data-testid="add-recommendation-input"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Catatan</label>
+                <Textarea
+                  placeholder="Catatan tambahan"
+                  value={newApplication.catatan}
+                  onChange={(e) => setNewApplication(prev => ({ ...prev, catatan: e.target.value }))}
+                  data-testid="add-notes-textarea"
+                  className="min-h-[60px]"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddDialogOpen(false);
+                setNewApplication({
+                  nim: '',
+                  email: '',
+                  nama_lengkap: '',
+                  nomor_telepon: '',
+                  alamat: '',
+                  ipk: '',
+                  penghasilan_keluarga: '',
+                  essay: '',
+                  dokumen_pendukung: '',
+                  rekomendasi: '',
+                  status: 'Dalam Review',
+                  catatan: ''
+                });
+              }}
+              data-testid="cancel-add-btn"
+            >
+              Batal
+            </Button>
+            <Button
+              onClick={handleAdd}
+              data-testid="save-add-btn"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Tambah Aplikasi
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Import CSV Dialog */}
       <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
         <DialogContent className="sm:max-w-lg">
