@@ -370,7 +370,7 @@ const AdminDashboard = ({ onLogout }) => {
     setEditingApp({ ...app });
     setIsEditDialogOpen(true);
   };
-    if (!editingApp) return;
+  const handleUpdate = async () => {
 
     try {
       await axios.put(`${API}/admin/applications/${editingApp.id}`, {
