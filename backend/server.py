@@ -49,6 +49,7 @@ class ScholarshipApplication(BaseModel):
     dokumen_pendukung: Optional[str] = None  # URL atau nama file
     rekomendasi: Optional[str] = None
     status: str = "Dalam Review"  # Dalam Review, Diterima, Ditolak
+    tahap: str = "Administrasi"  # Administrasi, Wawancara, Final
     catatan: Optional[str] = None
     tanggal_daftar: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     tanggal_update: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -64,6 +65,7 @@ class ScholarshipApplicationCreate(BaseModel):
     essay: str
     dokumen_pendukung: Optional[str] = None
     rekomendasi: Optional[str] = None
+    tahap: Optional[str] = "Administrasi"
 
 class ScholarshipApplicationUpdate(BaseModel):
     nama_lengkap: Optional[str] = None
@@ -75,6 +77,7 @@ class ScholarshipApplicationUpdate(BaseModel):
     dokumen_pendukung: Optional[str] = None
     rekomendasi: Optional[str] = None
     status: Optional[str] = None
+    tahap: Optional[str] = None
     catatan: Optional[str] = None
 
 class StatusCheckRequest(BaseModel):
@@ -86,6 +89,7 @@ class StatusResponse(BaseModel):
     nim: Optional[str] = None
     nama_lengkap: Optional[str] = None
     status: Optional[str] = None
+    tahap: Optional[str] = None
     catatan: Optional[str] = None
     tanggal_daftar: Optional[datetime] = None
     tanggal_update: Optional[datetime] = None
@@ -168,18 +172,32 @@ async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(
 def parse_csv_row(row):
     """Parse a CSV row into a scholarship application"""
     try:
+        # Handle optional numeric fields
+        ipk_value = row.get("ipk", "").strip()
+        if not ipk_value or ipk_value == "-":
+            ipk_value = 0.0
+        else:
+            ipk_value = float(ipk_value)
+        
+        penghasilan_value = row.get("penghasilan_keluarga", "").strip()
+        if not penghasilan_value or penghasilan_value == "-":
+            penghasilan_value = 0
+        else:
+            penghasilan_value = int(penghasilan_value)
+        
         return {
             "nim": str(row.get("nim", "")).strip(),
             "email": str(row.get("email", "")).strip(),
             "nama_lengkap": str(row.get("nama_lengkap", "")).strip(),
             "nomor_telepon": str(row.get("nomor_telepon", "")).strip(),
             "alamat": str(row.get("alamat", "")).strip(),
-            "ipk": float(row.get("ipk", 0)),
-            "penghasilan_keluarga": int(row.get("penghasilan_keluarga", 0)),
+            "ipk": ipk_value,
+            "penghasilan_keluarga": penghasilan_value,
             "essay": str(row.get("essay", "")).strip(),
             "dokumen_pendukung": str(row.get("dokumen_pendukung", "")).strip() or None,
             "rekomendasi": str(row.get("rekomendasi", "")).strip() or None,
             "status": str(row.get("status", "Dalam Review")).strip(),
+            "tahap": str(row.get("tahap", "Administrasi")).strip(),
             "catatan": str(row.get("catatan", "")).strip() or None,
         }
     except (ValueError, TypeError) as e:
@@ -210,6 +228,7 @@ async def check_scholarship_status(request: StatusCheckRequest):
             nim=application["nim"],
             nama_lengkap=application["nama_lengkap"],
             status=application["status"],
+            tahap=application.get("tahap", "Administrasi"),
             catatan=application.get("catatan"),
             tanggal_daftar=application["tanggal_daftar"],
             tanggal_update=application["tanggal_update"]
@@ -433,15 +452,31 @@ logger = logging.getLogger(__name__)
 # Startup event to create default admin
 @app.on_event("startup")
 async def startup_event():
+    # Get admin credentials from environment variables
+    admin_username = os.environ.get("ADMIN_USERNAME", "admin")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
+    
     # Create default admin if not exists
-    admin_exists = await db.admins.find_one({"username": "admin"})
+    admin_exists = await db.admins.find_one({"username": admin_username})
     if not admin_exists:
         default_admin = Admin(
-            username="admin",
-            hashed_password=get_password_hash("admin123")
+            username=admin_username,
+            hashed_password=get_password_hash(admin_password)
         )
         await db.admins.insert_one(prepare_for_mongo(default_admin.dict()))
-        logger.info("Default admin created with username: admin, password: admin123")
+        logger.info(f"Default admin created with username: {admin_username}")
+    else:
+        # Update existing admin password if it changed
+        current_hash = admin_exists.get("hashed_password")
+        new_hash = get_password_hash(admin_password)
+        if current_hash != new_hash:
+            await db.admins.update_one(
+                {"username": admin_username},
+                {"$set": {"hashed_password": new_hash}}
+            )
+            logger.info(f"Admin password updated for username: {admin_username}")
+        else:
+            logger.info(f"Admin user already exists: {admin_username}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

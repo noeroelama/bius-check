@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: beasiswa-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: beasiswa_db
+
+  backend:
+    build: ./backend
+    container_name: beasiswa-backend
+    restart: unless-stopped
+    ports:
+      - "8889:8889"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=beasiswa_db
+      - JWT_SECRET=beasiswa-itb-secret-key-2024-very-secure
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin123
+      - CORS_ORIGINS=http://localhost:8889,http://127.0.0.1:8889
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    container_name: beasiswa-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8889
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  nginx:
+    image: nginx:alpine
+    container_name: beasiswa-nginx
+    restart: unless-stopped
+    ports:
+      - "8889:80"
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  mongodb_data:

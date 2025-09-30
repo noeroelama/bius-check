@@ -12,7 +12,7 @@ import { Textarea } from './components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { toast } from 'sonner';
 import { Toaster } from './components/ui/sonner';
-import { Upload, FileUp, Download, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Upload, FileUp, Download, Users, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -170,10 +170,16 @@ const StatusChecker = () => {
                       </Badge>
                     </div>
                     <div>
+                      <p className="text-sm text-gray-600">Tahap</p>
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-medium" data-testid="step-badge">
+                        {result.tahap || 'Administrasi'}
+                      </Badge>
+                    </div>
+                    <div>
                       <p className="text-sm text-gray-600">Tanggal Daftar</p>
                       <p className="font-medium text-gray-900">{formatDate(result.tanggal_daftar)}</p>
                     </div>
-                    <div className="md:col-span-2">
+                    <div>
                       <p className="text-sm text-gray-600">Tanggal Update Terakhir</p>
                       <p className="font-medium text-gray-900">{formatDate(result.tanggal_update)}</p>
                     </div>
@@ -282,6 +288,14 @@ const AdminLogin = ({ onLogin }) => {
 const AdminDashboard = ({ onLogout }) => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    total_pages: 1,
+    total_count: 0,
+    limit: 10,
+    has_next: false,
+    has_prev: false
+  });
   const [editingApp, setEditingApp] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -300,6 +314,7 @@ const AdminDashboard = ({ onLogout }) => {
     dokumen_pendukung: '',
     rekomendasi: '',
     status: 'Dalam Review',
+    tahap: 'Administrasi',
     catatan: ''
   });
   const fileInputRef = useRef(null);
@@ -311,11 +326,12 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
-  const fetchApplications = async () => {
+  const fetchApplications = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API}/admin/applications`, axiosConfig);
-      setApplications(response.data);
+      const response = await axios.get(`${API}/admin/applications?page=${page}&limit=10`, axiosConfig);
+      setApplications(response.data.applications);
+      setPagination(response.data.pagination);
     } catch (error) {
       console.error('Error fetching applications:', error);
       if (error.response?.status === 401) {
@@ -330,7 +346,7 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   useEffect(() => {
-    fetchApplications();
+    fetchApplications(1);
   }, []);
 
   const handleAdd = async () => {
@@ -357,9 +373,10 @@ const AdminDashboard = ({ onLogout }) => {
         dokumen_pendukung: '',
         rekomendasi: '',
         status: 'Dalam Review',
+        tahap: 'Administrasi',
         catatan: ''
       });
-      fetchApplications();
+      fetchApplications(1);
     } catch (error) {
       console.error('Error adding application:', error);
       toast.error(error.response?.data?.detail || 'Gagal menambahkan aplikasi');
@@ -375,13 +392,14 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       await axios.put(`${API}/admin/applications/${editingApp.id}`, {
         status: editingApp.status,
+        tahap: editingApp.tahap,
         catatan: editingApp.catatan
       }, axiosConfig);
       
       toast.success('Data berhasil diperbarui');
       setIsEditDialogOpen(false);
       setEditingApp(null);
-      fetchApplications();
+      fetchApplications(pagination.current_page);
     } catch (error) {
       console.error('Error updating application:', error);
       toast.error('Gagal memperbarui data');
@@ -394,7 +412,7 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       await axios.delete(`${API}/admin/applications/${appId}`, axiosConfig);
       toast.success('Aplikasi berhasil dihapus');
-      fetchApplications();
+      fetchApplications(pagination.current_page);
     } catch (error) {
       console.error('Error deleting application:', error);
       toast.error('Gagal menghapus aplikasi');
@@ -426,7 +444,7 @@ const AdminDashboard = ({ onLogout }) => {
         if (result.errors.length > 0) {
           console.log('Import errors:', result.errors);
         }
-        fetchApplications();
+        fetchApplications(1);
       } else {
         toast.error('Gagal mengimpor data');
       }
@@ -458,6 +476,7 @@ const AdminDashboard = ({ onLogout }) => {
         dokumen_pendukung: 'KTM, KK, Slip Gaji',
         rekomendasi: 'Surat rekomendasi dosen',
         status: 'Dalam Review',
+        tahap: 'Administrasi',
         catatan: 'Catatan opsional'
       }
     ];
@@ -534,7 +553,7 @@ const AdminDashboard = ({ onLogout }) => {
                 Import CSV
               </Button>
               <Button
-                onClick={fetchApplications}
+                onClick={() => fetchApplications(pagination.current_page)}
                 disabled={loading}
                 data-testid="refresh-applications-btn"
                 className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
@@ -551,28 +570,53 @@ const AdminDashboard = ({ onLogout }) => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50">
-                      <TableHead>NIM</TableHead>
-                      <TableHead className="hidden sm:table-cell">Nama</TableHead>
-                      <TableHead className="hidden md:table-cell">Email</TableHead>
-                      <TableHead className="hidden sm:table-cell">IPK</TableHead>
+                      <TableHead className="min-w-[100px]">NIM</TableHead>
+                      <TableHead className="min-w-[150px]">Nama</TableHead>
+                      <TableHead className="hidden md:table-cell min-w-[200px]">Email</TableHead>
+                      <TableHead className="hidden sm:table-cell text-center">IPK</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="hidden md:table-cell">Tanggal Daftar</TableHead>
-                      <TableHead className="text-center">Aksi</TableHead>
+                      <TableHead className="hidden lg:table-cell">Tahap</TableHead>
+                      <TableHead className="hidden xl:table-cell">Tanggal</TableHead>
+                      <TableHead className="text-center min-w-[120px]">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {applications.map((app) => (
                       <TableRow key={app.id}>
-                        <TableCell className="font-mono text-sm">{app.nim}</TableCell>
-                        <TableCell className="font-medium hidden sm:table-cell">{app.nama_lengkap}</TableCell>
-                        <TableCell className="text-sm hidden md:table-cell">{app.email}</TableCell>
+                        <TableCell className="font-mono text-xs sm:text-sm">
+                          <div>{app.nim}</div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="max-w-[150px] truncate" title={app.nama_lengkap}>
+                            {app.nama_lengkap}
+                          </div>
+                          <div className="text-xs text-gray-500 md:hidden mt-1 truncate" title={app.email}>
+                            {app.email}
+                          </div>
+                          <div className="text-xs text-gray-500 sm:hidden mt-1">
+                            IPK: {app.ipk}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm hidden md:table-cell">
+                          <div className="max-w-[200px] truncate" title={app.email}>
+                            {app.email}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-center font-semibold hidden sm:table-cell">{app.ipk}</TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(app.status)}>
                             {app.status}
                           </Badge>
+                          <div className="text-xs text-blue-600 lg:hidden mt-1">
+                            {app.tahap || 'Administrasi'}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-sm hidden md:table-cell">{formatDate(app.tanggal_daftar)}</TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
+                            {app.tahap || 'Administrasi'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm hidden xl:table-cell">{formatDate(app.tanggal_daftar)}</TableCell>
                         <TableCell className="text-center">
                           <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
                             <Button
@@ -604,6 +648,76 @@ const AdminDashboard = ({ onLogout }) => {
                   Belum ada aplikasi beasiswa
                 </div>
               )}
+              
+              {/* Pagination Controls */}
+              {pagination.total_pages > 1 && (
+                <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Menampilkan {((pagination.current_page - 1) * pagination.limit) + 1} - {Math.min(pagination.current_page * pagination.limit, pagination.total_count)} dari {pagination.total_count} data
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchApplications(pagination.current_page - 1)}
+                        disabled={!pagination.has_prev}
+                        className="flex items-center"
+                        data-testid="prev-page-btn"
+                      >
+                        <ChevronLeft className="w-4 h-4 mr-1" />
+                        Sebelumnya
+                      </Button>
+                      
+                      {/* Page Numbers */}
+                      <div className="hidden sm:flex space-x-1">
+                        {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                          let pageNum;
+                          if (pagination.total_pages <= 5) {
+                            pageNum = i + 1;
+                          } else if (pagination.current_page <= 3) {
+                            pageNum = i + 1;
+                          } else if (pagination.current_page >= pagination.total_pages - 2) {
+                            pageNum = pagination.total_pages - 4 + i;
+                          } else {
+                            pageNum = pagination.current_page - 2 + i;
+                          }
+                          
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={pageNum === pagination.current_page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => fetchApplications(pageNum)}
+                              className="w-8 h-8 p-0"
+                              data-testid={`page-btn-${pageNum}`}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Mobile page indicator */}
+                      <div className="sm:hidden text-sm text-gray-600">
+                        {pagination.current_page} / {pagination.total_pages}
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchApplications(pagination.current_page + 1)}
+                        disabled={!pagination.has_next}
+                        className="flex items-center"
+                        data-testid="next-page-btn"
+                      >
+                        Selanjutnya
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -632,6 +746,22 @@ const AdminDashboard = ({ onLogout }) => {
                   <SelectItem value="Dalam Review">Dalam Review</SelectItem>
                   <SelectItem value="Diterima">Diterima</SelectItem>
                   <SelectItem value="Ditolak">Ditolak</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Tahap</label>
+              <Select
+                value={editingApp?.tahap || ''}
+                onValueChange={(value) => setEditingApp(prev => ({ ...prev, tahap: value }))}
+              >
+                <SelectTrigger data-testid="step-select">
+                  <SelectValue placeholder="Pilih tahap" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Administrasi">Administrasi</SelectItem>
+                  <SelectItem value="Wawancara">Wawancara</SelectItem>
+                  <SelectItem value="Final">Final</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -752,6 +882,22 @@ const AdminDashboard = ({ onLogout }) => {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Tahap</label>
+                <Select
+                  value={newApplication.tahap}
+                  onValueChange={(value) => setNewApplication(prev => ({ ...prev, tahap: value }))}
+                >
+                  <SelectTrigger data-testid="add-step-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Administrasi">Administrasi</SelectItem>
+                    <SelectItem value="Wawancara">Wawancara</SelectItem>
+                    <SelectItem value="Final">Final</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Alamat</label>
                 <Input
@@ -818,6 +964,7 @@ const AdminDashboard = ({ onLogout }) => {
                   dokumen_pendukung: '',
                   rekomendasi: '',
                   status: 'Dalam Review',
+                  tahap: 'Administrasi',
                   catatan: ''
                 });
               }}
@@ -867,7 +1014,7 @@ const AdminDashboard = ({ onLogout }) => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="text-sm font-medium text-blue-900 mb-2">Format CSV yang Diperlukan:</h4>
               <p className="text-xs text-blue-800 mb-2">
-                File CSV harus memiliki kolom: nim, email, nama_lengkap, nomor_telepon, alamat, ipk, penghasilan_keluarga, essay, dokumen_pendukung, rekomendasi, status, catatan
+                File CSV harus memiliki kolom: nim, email, nama_lengkap, nomor_telepon, alamat, ipk, penghasilan_keluarga, essay, dokumen_pendukung, rekomendasi, status, tahap, catatan
               </p>
               <p className="text-xs text-blue-800 mb-2">
                 <strong>Catatan:</strong> Jika NIM dan email sudah ada, data akan diperbarui. Jika belum ada, data baru akan ditambahkan.
