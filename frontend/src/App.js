@@ -12,7 +12,7 @@ import { Textarea } from './components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { toast } from 'sonner';
 import { Toaster } from './components/ui/sonner';
-import { Upload, FileUp, Download, Users, CheckCircle, Clock, XCircle, Search, BookOpen } from 'lucide-react';
+import { Upload, FileUp, Download, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
