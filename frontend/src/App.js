@@ -518,6 +518,14 @@ const AdminDashboard = ({ onLogout }) => {
             <h2 className="text-xl font-semibold text-gray-800">Daftar Aplikasi Beasiswa</h2>
             <div className="flex space-x-3">
               <Button
+                onClick={() => setIsAddDialogOpen(true)}
+                data-testid="add-application-btn"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Tambah Aplikasi
+              </Button>
+              <Button
                 onClick={() => setIsImportDialogOpen(true)}
                 data-testid="import-csv-btn"
                 className="bg-green-600 hover:bg-green-700 text-white"
