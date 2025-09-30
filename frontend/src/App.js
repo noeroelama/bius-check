@@ -514,13 +514,13 @@ const AdminDashboard = ({ onLogout }) => {
       {/* Content */}
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col space-y-4 mb-4">
             <h2 className="text-xl font-semibold text-gray-800">Daftar Aplikasi Beasiswa</h2>
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => setIsAddDialogOpen(true)}
                 data-testid="add-application-btn"
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
               >
                 <Users className="w-4 h-4 mr-2" />
                 Tambah Aplikasi
@@ -528,7 +528,7 @@ const AdminDashboard = ({ onLogout }) => {
               <Button
                 onClick={() => setIsImportDialogOpen(true)}
                 data-testid="import-csv-btn"
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Import CSV
@@ -537,7 +537,7 @@ const AdminDashboard = ({ onLogout }) => {
                 onClick={fetchApplications}
                 disabled={loading}
                 data-testid="refresh-applications-btn"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
               >
                 {loading ? 'Memuat...' : 'Refresh Data'}
               </Button>
