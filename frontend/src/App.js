@@ -147,118 +147,57 @@ const StatusChecker = () => {
 
         {/* Results */}
         {result && (
-          <div className="max-w-2xl mx-auto mb-12">
+          <div className="max-w-2xl mx-auto mb-8">
             {result.found ? (
-              <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm" data-testid="status-result">
+              <Card className="shadow-lg border-0 bg-white" data-testid="status-result">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
-                    <Users className="w-6 h-6 text-blue-600" />
-                    Status Aplikasi Beasiswa
-                  </CardTitle>
+                  <CardTitle className="text-xl text-gray-800">Status Aplikasi</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Status Badge */}
-                  <div className="flex items-center justify-center py-4">
-                    <div className={`flex items-center gap-3 px-6 py-3 rounded-full ${getStatusColor(result.status)} border-2`} data-testid="status-badge">
-                      {getStatusIcon(result.status)}
-                      <span className="font-bold text-lg">{result.status}</span>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">NIM</p>
+                      <p className="font-medium text-gray-900">{result.nim}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Nama Lengkap</p>
+                      <p className="font-medium text-gray-900">{result.nama_lengkap}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Status</p>
+                      <Badge className={`${getStatusColor(result.status)} font-medium`} data-testid="status-badge">
+                        {result.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Tanggal Daftar</p>
+                      <p className="font-medium text-gray-900">{formatDate(result.tanggal_daftar)}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-gray-600">Tanggal Update Terakhir</p>
+                      <p className="font-medium text-gray-900">{formatDate(result.tanggal_update)}</p>
                     </div>
                   </div>
-                  
-                  {/* Details Grid */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-600">NIM</p>
-                      <p className="font-mono text-lg font-bold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{result.nim}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-600">Nama Lengkap</p>
-                      <p className="text-lg font-semibold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{result.nama_lengkap}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-600">Tanggal Daftar</p>
-                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{formatDate(result.tanggal_daftar)}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-600">Update Terakhir</p>
-                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{formatDate(result.tanggal_update)}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Notes */}
                   {result.catatan && (
-                    <div className="mt-6">
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0">
-                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                              <BookOpen className="w-4 h-4 text-white" />
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-blue-900 mb-1">Catatan</p>
-                            <p className="text-blue-800 leading-relaxed" data-testid="status-notes">{result.catatan}</p>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600 mb-1">Catatan</p>
+                      <p className="text-gray-800" data-testid="status-notes">{result.catatan}</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ) : (
-              <Card className="shadow-2xl border-0 bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-                <CardContent className="p-8 text-center">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                      <XCircle className="w-8 h-8 text-red-600" />
-                    </div>
-                    <div>
-                      <p className="text-red-800 font-bold text-lg mb-2">Data tidak ditemukan</p>
-                      <p className="text-red-600 text-base">
-                        Periksa kembali NIM dan Email yang Anda masukkan
-                      </p>
-                    </div>
-                  </div>
+              <Card className="shadow-lg border-0 bg-red-50 border-red-200">
+                <CardContent className="p-6 text-center">
+                  <p className="text-red-800 font-medium">Data tidak ditemukan</p>
+                  <p className="text-red-600 text-sm mt-2">
+                    Periksa kembali NIM dan Email yang Anda masukkan
+                  </p>
                 </CardContent>
               </Card>
             )}
           </div>
         )}
-
-        {/* Info Section */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card className="text-center border-0 bg-white/70 backdrop-blur-sm shadow-lg">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">Pencarian Mudah</h3>
-                <p className="text-sm text-gray-600">Masukkan NIM dan email untuk mengecek status beasiswa Anda</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center border-0 bg-white/70 backdrop-blur-sm shadow-lg">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">Hasil Akurat</h3>
-                <p className="text-sm text-gray-600">Informasi status terkini langsung dari database ITB</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center border-0 bg-white/70 backdrop-blur-sm shadow-lg">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-6 h-6 text-purple-600" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">Informasi Lengkap</h3>
-                <p className="text-sm text-gray-600">Status, tanggal, dan catatan penting untuk aplikasi Anda</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </div>
     </div>
   );
