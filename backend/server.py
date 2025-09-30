@@ -37,6 +37,10 @@ app = FastAPI(title="Beasiswa ITB Status Checker")
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Configure paths
+ROOT_DIR = Path(__file__).parent
+FRONTEND_BUILD_DIR = ROOT_DIR / "../frontend/build"
+
 # Pydantic Models
 class ScholarshipApplication(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
