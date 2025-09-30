@@ -79,21 +79,23 @@ install_frontend_deps() {
     print_status "Installing frontend dependencies..."
     cd "$FRONTEND_DIR"
     
+    # Clean install for better compatibility
+    if [ -d "node_modules" ]; then
+        print_status "Cleaning existing node_modules..."
+        rm -rf node_modules package-lock.json
+    fi
+    
     # Try yarn first, then npm with legacy peer deps
     if command -v yarn &> /dev/null; then
         print_status "Using yarn for dependency installation..."
-        if [ ! -d "node_modules" ]; then
-            yarn install
-        else
-            yarn install --check-files
-        fi
+        yarn install
+        # Fix Node.js 20 compatibility issue
+        npm install ajv@^8.11.0 --legacy-peer-deps
     else
         print_status "Using npm for dependency installation..."
-        if [ ! -d "node_modules" ]; then
-            npm install --legacy-peer-deps
-        else
-            npm update --legacy-peer-deps
-        fi
+        npm install --legacy-peer-deps
+        # Fix Node.js 20 compatibility issue  
+        npm install ajv@^8.11.0 --legacy-peer-deps
     fi
     
     print_success "Frontend dependencies installed"
