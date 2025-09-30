@@ -704,28 +704,6 @@ const AdminDashboard = ({ onLogout }) => {
                   data-testid="add-name-input"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Nomor Telepon</label>
-                <Input
-                  placeholder="081234567890"
-                  value={newApplication.nomor_telepon}
-                  onChange={(e) => setNewApplication(prev => ({ ...prev, nomor_telepon: e.target.value }))}
-                  data-testid="add-phone-input"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">IPK</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="4"
-                  placeholder="3.75"
-                  value={newApplication.ipk}
-                  onChange={(e) => setNewApplication(prev => ({ ...prev, ipk: e.target.value }))}
-                  data-testid="add-ipk-input"
-                />
-              </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Alamat</label>
                 <Input
@@ -734,32 +712,6 @@ const AdminDashboard = ({ onLogout }) => {
                   onChange={(e) => setNewApplication(prev => ({ ...prev, alamat: e.target.value }))}
                   data-testid="add-address-input"
                 />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Penghasilan Keluarga</label>
-                <Input
-                  type="number"
-                  placeholder="5000000"
-                  value={newApplication.penghasilan_keluarga}
-                  onChange={(e) => setNewApplication(prev => ({ ...prev, penghasilan_keluarga: e.target.value }))}
-                  data-testid="add-income-input"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                <Select
-                  value={newApplication.status}
-                  onValueChange={(value) => setNewApplication(prev => ({ ...prev, status: value }))}
-                >
-                  <SelectTrigger data-testid="add-status-select">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Dalam Review">Dalam Review</SelectItem>
-                    <SelectItem value="Diterima">Diterima</SelectItem>
-                    <SelectItem value="Ditolak">Ditolak</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Essay</label>
