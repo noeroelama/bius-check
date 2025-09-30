@@ -494,16 +494,16 @@ const AdminDashboard = ({ onLogout }) => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
             <div className="flex items-center space-x-4">
-              <img src={LOGO_URL} alt="ITB untuk Semua" className="h-10 w-auto" />
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard Admin Beasiswa</h1>
+              <img src={LOGO_URL} alt="ITB untuk Semua" className="h-8 sm:h-10 w-auto" />
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Dashboard Admin Beasiswa</h1>
             </div>
             <Button
               onClick={onLogout}
               variant="outline"
               data-testid="admin-logout-btn"
-              className="border-red-300 text-red-600 hover:bg-red-50"
+              className="border-red-300 text-red-600 hover:bg-red-50 w-full sm:w-auto"
             >
               Keluar
             </Button>
