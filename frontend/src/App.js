@@ -76,64 +76,33 @@ const StatusChecker = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Header Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-purple-600/90"></div>
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-white bg-opacity-10" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            opacity: 0.2
-          }}></div>
-        </div>
-        
-        <div className="relative container mx-auto px-4 py-16">
-          <div className="flex flex-col items-center text-center text-white">
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
             {/* Logo */}
             <div className="mb-6">
               <img 
                 src={LOGO_URL} 
                 alt="ITB untuk Semua" 
-                className="h-20 w-auto mx-auto drop-shadow-lg"
+                className="h-16 w-auto mx-auto"
               />
             </div>
             
             {/* Title */}
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Cek Status Beasiswa
             </h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              Beasiswa ITB Untuk Semua - Periksa status aplikasi beasiswa Anda dengan mudah
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Beasiswa ITB Untuk Semua - Periksa status aplikasi beasiswa Anda
             </p>
-            
-            {/* Decorative Elements */}
-            <div className="flex space-x-4 mt-8 text-blue-200">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="w-5 h-5" />
-                <span className="text-sm">Mudah Digunakan</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Search className="w-5 h-5" />
-                <span className="text-sm">Pencarian Cepat</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-5 h-5" />
-                <span className="text-sm">Hasil Akurat</span>
-              </div>
-            </div>
           </div>
-        </div>
-        
-        {/* Wave decoration */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <svg className="w-full h-20 text-blue-50" fill="currentColor" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
-          </svg>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 -mt-12 relative z-10">
+      <div className="container mx-auto px-4 py-8">
         {/* Status Check Form */}
         <div className="max-w-md mx-auto mb-12">
           <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
