@@ -333,6 +333,7 @@ async def import_applications_csv(file: UploadFile = File(...), admin: dict = De
         csv_reader = csv.DictReader(io.StringIO(csv_content))
         
         imported_count = 0
+        updated_count = 0
         errors = []
         
         for row_num, row in enumerate(csv_reader, start=2):  # Start from 2 because row 1 is header
@@ -345,30 +346,40 @@ async def import_applications_csv(file: UploadFile = File(...), admin: dict = De
                     errors.append(f"Baris {row_num}: NIM, email, dan nama_lengkap harus diisi")
                     continue
                 
-                # Check if NIM already exists
-                existing = await db.applications.find_one({"nim": app_data["nim"]})
+                # Check if application already exists (by NIM and email)
+                existing = await db.applications.find_one({
+                    "nim": app_data["nim"],
+                    "email": app_data["email"]
+                })
+                
                 if existing:
-                    errors.append(f"Baris {row_num}: NIM {app_data['nim']} sudah terdaftar")
-                    continue
-                
-                # Create application object
-                app_obj = ScholarshipApplication(**app_data)
-                app_mongo_data = prepare_for_mongo(app_obj.dict())
-                
-                # Insert into database
-                await db.applications.insert_one(app_mongo_data)
-                imported_count += 1
+                    # Update existing record
+                    app_data["tanggal_update"] = datetime.now(timezone.utc).isoformat()
+                    await db.applications.update_one(
+                        {"nim": app_data["nim"], "email": app_data["email"]},
+                        {"$set": app_data}
+                    )
+                    updated_count += 1
+                else:
+                    # Create new application
+                    app_obj = ScholarshipApplication(**app_data)
+                    app_mongo_data = prepare_for_mongo(app_obj.dict())
+                    await db.applications.insert_one(app_mongo_data)
+                    imported_count += 1
                 
             except ValueError as e:
                 errors.append(f"Baris {row_num}: {str(e)}")
             except Exception as e:
                 errors.append(f"Baris {row_num}: Kesalahan tidak terduga - {str(e)}")
         
+        total_processed = imported_count + updated_count
+        message = f"Berhasil memproses {total_processed} aplikasi ({imported_count} baru, {updated_count} diperbarui). {len(errors)} error ditemukan."
+        
         return ImportResult(
-            success=imported_count > 0,
-            imported_count=imported_count,
+            success=total_processed > 0,
+            imported_count=total_processed,
             errors=errors,
-            message=f"Berhasil mengimpor {imported_count} aplikasi. {len(errors)} error ditemukan."
+            message=message
         )
     
     except Exception as e:
