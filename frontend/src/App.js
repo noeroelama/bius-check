@@ -552,11 +552,11 @@ const AdminDashboard = ({ onLogout }) => {
                   <TableHeader>
                     <TableRow className="bg-gray-50">
                       <TableHead>NIM</TableHead>
-                      <TableHead>Nama</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>IPK</TableHead>
+                      <TableHead className="hidden sm:table-cell">Nama</TableHead>
+                      <TableHead className="hidden md:table-cell">Email</TableHead>
+                      <TableHead className="hidden sm:table-cell">IPK</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Tanggal Daftar</TableHead>
+                      <TableHead className="hidden md:table-cell">Tanggal Daftar</TableHead>
                       <TableHead className="text-center">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -564,22 +564,22 @@ const AdminDashboard = ({ onLogout }) => {
                     {applications.map((app) => (
                       <TableRow key={app.id}>
                         <TableCell className="font-mono text-sm">{app.nim}</TableCell>
-                        <TableCell className="font-medium">{app.nama_lengkap}</TableCell>
-                        <TableCell className="text-sm">{app.email}</TableCell>
-                        <TableCell className="text-center font-semibold">{app.ipk}</TableCell>
+                        <TableCell className="font-medium hidden sm:table-cell">{app.nama_lengkap}</TableCell>
+                        <TableCell className="text-sm hidden md:table-cell">{app.email}</TableCell>
+                        <TableCell className="text-center font-semibold hidden sm:table-cell">{app.ipk}</TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(app.status)}>
                             {app.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm">{formatDate(app.tanggal_daftar)}</TableCell>
+                        <TableCell className="text-sm hidden md:table-cell">{formatDate(app.tanggal_daftar)}</TableCell>
                         <TableCell className="text-center">
-                          <div className="flex gap-2 justify-center">
+                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
                             <Button
                               size="sm"
                               onClick={() => handleEdit(app)}
                               data-testid={`edit-btn-${app.nim}`}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs"
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs"
                             >
                               Edit
                             </Button>
@@ -588,7 +588,7 @@ const AdminDashboard = ({ onLogout }) => {
                               variant="destructive"
                               onClick={() => handleDelete(app.id)}
                               data-testid={`delete-btn-${app.nim}`}
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs"
+                              className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-xs"
                             >
                               Hapus
                             </Button>
