@@ -572,7 +572,6 @@ const AdminDashboard = ({ onLogout }) => {
                       <TableHead className="hidden sm:table-cell text-center">IPK</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="hidden lg:table-cell">Tahap</TableHead>
-                      <TableHead className="hidden xl:table-cell">Tanggal</TableHead>
                       <TableHead className="text-center min-w-[120px]">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
