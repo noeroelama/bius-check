@@ -16,6 +16,15 @@ body {
   line-height: 1.6;
 }
 
+/* Hide Made with Emergent badge */
+div[class*="emergent"], 
+div[style*="Made with Emergent"],
+a[href*="emergent.sh"],
+*[alt*="Made with Emergent"],
+*[title*="Made with Emergent"] {
+  display: none !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
