@@ -366,7 +366,10 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
-  const handleUpdate = async () => {
+  const handleEdit = (app) => {
+    setEditingApp({ ...app });
+    setIsEditDialogOpen(true);
+  };
     if (!editingApp) return;
 
     try {
