@@ -339,6 +339,13 @@ case "${1:-help}" in
     deploy)
         full_deploy
         ;;
+    password|passwd|change-password)
+        if [ -n "$2" ]; then
+            ./change-password.sh "$2"
+        else
+            ./change-password.sh
+        fi
+        ;;
     systemd)
         setup_systemd
         ;;
