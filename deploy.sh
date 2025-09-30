@@ -311,6 +311,7 @@ show_help() {
     echo "Examples:"
     echo "  $0 deploy    # Full deployment"
     echo "  $0 start     # Start application"
+    echo "  $0 password  # Change admin password"
     echo "  $0 logs      # View logs"
 }
 
