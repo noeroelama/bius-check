@@ -868,6 +868,9 @@ const AdminDashboard = ({ onLogout }) => {
               <p className="text-xs text-blue-800 mb-2">
                 File CSV harus memiliki kolom: nim, email, nama_lengkap, nomor_telepon, alamat, ipk, penghasilan_keluarga, essay, dokumen_pendukung, rekomendasi, status, catatan
               </p>
+              <p className="text-xs text-blue-800 mb-2">
+                <strong>Catatan:</strong> Jika NIM dan email sudah ada, data akan diperbarui. Jika belum ada, data baru akan ditambahkan.
+              </p>
               <Button
                 onClick={downloadSampleCSV}
                 variant="outline"
