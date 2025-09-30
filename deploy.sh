@@ -80,9 +80,9 @@ install_frontend_deps() {
     cd "$FRONTEND_DIR"
     
     if [ ! -d "node_modules" ]; then
-        npm install
+        npm install --legacy-peer-deps
     else
-        npm update
+        npm update --legacy-peer-deps
     fi
     
     print_success "Frontend dependencies installed"
