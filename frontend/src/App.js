@@ -667,15 +667,15 @@ const AdminDashboard = ({ onLogout }) => {
 
       {/* Add Application Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl max-w-[95vw] max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Tambah Aplikasi Baru</DialogTitle>
             <DialogDescription>
               Masukkan data aplikasi beasiswa baru
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">NIM *</label>
                 <Input
