@@ -104,57 +104,42 @@ const StatusChecker = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Status Check Form */}
-        <div className="max-w-md mx-auto mb-12">
-          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl text-gray-800 flex items-center justify-center gap-2">
-                <Search className="w-6 h-6 text-blue-600" />
-                Periksa Status
-              </CardTitle>
-              <CardDescription className="text-base text-gray-600">
+        <div className="max-w-md mx-auto mb-8">
+          <Card className="shadow-lg border-0 bg-white">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-gray-800">Periksa Status</CardTitle>
+              <CardDescription>
                 Masukkan NIM dan Email yang terdaftar
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Nomor Induk Mahasiswa (NIM)</label>
+            <CardContent className="space-y-4">
+              <div>
                 <Input
                   type="text"
-                  placeholder="Contoh: 13523001"
+                  placeholder="Nomor Induk Mahasiswa (NIM)"
                   value={nim}
                   onChange={(e) => setNim(e.target.value)}
                   data-testid="nim-input"
-                  className="h-12 text-base border-2 focus:border-blue-500 transition-colors"
+                  className="h-12 text-base"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Email Terdaftar</label>
+              <div>
                 <Input
                   type="email"
-                  placeholder="email@students.itb.ac.id"
+                  placeholder="Email terdaftar"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   data-testid="email-input"
-                  className="h-12 text-base border-2 focus:border-blue-500 transition-colors"
+                  className="h-12 text-base"
                 />
               </div>
               <Button
                 onClick={checkStatus}
                 disabled={loading}
                 data-testid="check-status-btn"
-                className="w-full h-12 text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Memeriksa...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-5 h-5 mr-2" />
-                    Periksa Status
-                  </>
-                )}
+                {loading ? 'Memeriksa...' : 'Periksa Status'}
               </Button>
             </CardContent>
           </Card>
