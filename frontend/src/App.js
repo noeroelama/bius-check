@@ -801,7 +801,7 @@ const AdminDashboard = ({ onLogout }) => {
               </div>
             </div>
           </div>
-          <div className="flex gap-2 justify-end">
+          <div className="flex flex-col sm:flex-row gap-2 justify-end">
             <Button
               variant="outline"
               onClick={() => {
@@ -822,13 +822,14 @@ const AdminDashboard = ({ onLogout }) => {
                 });
               }}
               data-testid="cancel-add-btn"
+              className="w-full sm:w-auto"
             >
               Batal
             </Button>
             <Button
               onClick={handleAdd}
               data-testid="save-add-btn"
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
             >
               Tambah Aplikasi
             </Button>
