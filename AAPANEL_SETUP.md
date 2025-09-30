@@ -119,6 +119,34 @@ Already fixed in package.json, but for reference:
 - **Username**: admin
 - **Password**: admin123
 
+⚠️ **IMPORTANT**: Change the default password after first login!
+
+### Change Admin Password
+
+After deployment, change the default password using one of these methods:
+
+**Method 1: Using deploy script (Recommended)**
+```bash
+./deploy.sh password
+# Follow the interactive prompts
+```
+
+**Method 2: Using dedicated script**
+```bash
+./change-password.sh
+# Follow the interactive prompts
+```
+
+**Method 3: Direct password change**
+```bash
+./change-password.sh "your-new-strong-password"
+```
+
+**Password Requirements:**
+- Minimum 6 characters (8+ recommended)
+- Use a mix of letters, numbers, and special characters
+- Avoid common passwords or dictionary words
+
 ## Architecture
 
 - **Single Port**: Everything runs on port 8889 internally
