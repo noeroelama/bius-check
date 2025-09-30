@@ -112,7 +112,15 @@ GENERATE_SOURCEMAP=false
 EOF
     fi
     
-    npm run build
+    # Try yarn first, then npm
+    if command -v yarn &> /dev/null && [ -f "yarn.lock" ]; then
+        print_status "Building with yarn..."
+        yarn build
+    else
+        print_status "Building with npm..."
+        npm run build
+    fi
+    
     print_success "Frontend built successfully"
 }
 
