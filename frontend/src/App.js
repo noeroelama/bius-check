@@ -175,11 +175,7 @@ const StatusChecker = () => {
                         {result.tahap || 'Administrasi'}
                       </Badge>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Tanggal Daftar</p>
-                      <p className="font-medium text-gray-900">{formatDate(result.tanggal_daftar)}</p>
-                    </div>
-                    <div>
+                    <div className="md:col-span-2">
                       <p className="text-sm text-gray-600">Tanggal Update Terakhir</p>
                       <p className="font-medium text-gray-900">{formatDate(result.tanggal_update)}</p>
                     </div>
