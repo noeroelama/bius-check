@@ -1,15 +1,17 @@
 #!/bin/bash
 
-# Beasiswa ITB Status Checker Deployment Script
-# Usage: ./deploy.sh [start|stop|restart|status|logs|clean]
+# Beasiswa ITB Status Checker - Deployment Script
+# Usage: ./deploy.sh [start|stop|restart|status|build|logs]
 
 set -e
 
 # Configuration
-PROJECT_NAME="beasiswa-checker"
-BACKEND_PORT=8889
-FRONTEND_PORT=3000
-MONGO_PORT=27017
+APP_NAME="beasiswa-checker"
+APP_PORT=8889
+BACKEND_DIR="$(pwd)/backend"
+FRONTEND_DIR="$(pwd)/frontend"
+PID_FILE="/tmp/${APP_NAME}.pid"
+LOG_FILE="/tmp/${APP_NAME}.log"
 
 # Colors for output
 RED='\033[0;31m'
@@ -18,382 +20,290 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging function
-log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
-warn() {
-    echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] WARNING: $1${NC}"
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
-error() {
-    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}"
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-info() {
-    echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $1${NC}"
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Function to check if a port is in use
-check_port() {
-    local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null ; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Function to kill process on port
-kill_port() {
-    local port=$1
-    if check_port $port; then
-        warn "Port $port is in use. Killing existing processes..."
-        lsof -ti:$port | xargs kill -9 2>/dev/null || true
-        sleep 2
-    fi
-}
-
-# Function to check if MongoDB is running
-check_mongodb() {
-    if pgrep mongod > /dev/null; then
-        log "MongoDB is running"
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Function to start MongoDB
-start_mongodb() {
-    if ! check_mongodb; then
-        log "Starting MongoDB..."
-        if command -v systemctl > /dev/null; then
-            sudo systemctl start mongod || {
-                error "Failed to start MongoDB with systemctl"
-                info "Trying to start MongoDB manually..."
-                mongod --fork --logpath /var/log/mongodb/mongod.log --dbpath /var/lib/mongodb
-            }
-        else
-            mongod --fork --logpath /var/log/mongodb/mongod.log --dbpath /var/lib/mongodb
-        fi
-        sleep 3
-    fi
-}
-
-# Function to stop MongoDB
-stop_mongodb() {
-    if check_mongodb; then
-        log "Stopping MongoDB..."
-        if command -v systemctl > /dev/null; then
-            sudo systemctl stop mongod || true
-        else
-            pkill mongod || true
-        fi
-    fi
-}
-
-# Function to setup environment files
-setup_env() {
-    log "Setting up environment files..."
+check_dependencies() {
+    print_status "Checking dependencies..."
     
-    # Backend .env
-    if [ ! -f "backend/.env" ]; then
-        log "Creating backend/.env file..."
-        cat > backend/.env << EOF
-# Database Configuration
-MONGO_URL=mongodb://localhost:27017
-DB_NAME=beasiswa_db
-
-# JWT Configuration
-JWT_SECRET=beasiswa-itb-secret-key-2024-very-secure
-
-# Admin Configuration
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin123
-
-# CORS Configuration
-CORS_ORIGINS=http://localhost:8889,http://127.0.0.1:8889
-
-# Server Configuration
-PORT=8889
-EOF
-    else
-        log "Backend .env file already exists"
+    # Check Python
+    if ! command -v python3 &> /dev/null; then
+        print_error "Python3 is not installed"
+        exit 1
     fi
     
-    # Frontend .env
-    if [ ! -f "frontend/.env" ]; then
-        log "Creating frontend/.env file..."
-        cat > frontend/.env << EOF
-# Backend API URL
-REACT_APP_BACKEND_URL=http://localhost:8889
+    # Check Node.js
+    if ! command -v node &> /dev/null; then
+        print_error "Node.js is not installed"
+        exit 1
+    fi
+    
+    # Check npm
+    if ! command -v npm &> /dev/null; then
+        print_error "npm is not installed"
+        exit 1
+    fi
+    
+    print_success "All dependencies found"
+}
 
-# Build Configuration
+install_backend_deps() {
+    print_status "Installing backend dependencies..."
+    cd "$BACKEND_DIR"
+    
+    if [ ! -d "venv" ]; then
+        print_status "Creating Python virtual environment..."
+        python3 -m venv venv
+    fi
+    
+    source venv/bin/activate
+    pip install -r requirements.txt
+    
+    print_success "Backend dependencies installed"
+}
+
+install_frontend_deps() {
+    print_status "Installing frontend dependencies..."
+    cd "$FRONTEND_DIR"
+    
+    if [ ! -d "node_modules" ]; then
+        npm install
+    else
+        npm update
+    fi
+    
+    print_success "Frontend dependencies installed"
+}
+
+build_frontend() {
+    print_status "Building frontend..."
+    cd "$FRONTEND_DIR"
+    
+    # Update environment for production
+    if [ ! -f ".env" ]; then
+        cat > .env << EOF
+REACT_APP_BACKEND_URL=https://cek.itbuntuksemua.com
+WDS_SOCKET_PORT=443
 GENERATE_SOURCEMAP=false
 EOF
-    else
-        log "Frontend .env file already exists"
-    fi
-}
-
-# Function to install dependencies
-install_dependencies() {
-    log "Installing dependencies..."
-    
-    # Backend dependencies
-    if [ -d "backend" ]; then
-        log "Installing Python dependencies..."
-        cd backend
-        if [ ! -d "venv" ]; then
-            python3 -m venv venv
-        fi
-        source venv/bin/activate
-        pip install -r requirements.txt
-        cd ..
     fi
     
-    # Frontend dependencies
-    if [ -d "frontend" ]; then
-        log "Installing Node.js dependencies..."
-        cd frontend
-        npm install || yarn install
-        cd ..
-    fi
-}
-
-# Function to start backend
-start_backend() {
-    log "Starting FastAPI backend on port $BACKEND_PORT..."
-    cd backend
-    source venv/bin/activate
-    nohup uvicorn server:app --host 0.0.0.0 --port $BACKEND_PORT --reload > ../backend.log 2>&1 &
-    echo $! > ../backend.pid
-    cd ..
-    sleep 3
-    if check_port $BACKEND_PORT; then
-        log "Backend started successfully on port $BACKEND_PORT"
-    else
-        error "Failed to start backend"
-        exit 1
-    fi
-}
-
-# Function to start frontend
-start_frontend() {
-    log "Building and serving React frontend..."
-    cd frontend
-    
-    # Build the frontend
     npm run build
+    print_success "Frontend built successfully"
+}
+
+start_app() {
+    if is_running; then
+        print_warning "Application is already running (PID: $(cat $PID_FILE))"
+        return 0
+    fi
     
-    # Serve the built frontend using Python's built-in server
-    nohup python3 -m http.server $FRONTEND_PORT --directory build > ../frontend.log 2>&1 &
-    echo $! > ../frontend.pid
-    cd ..
+    print_status "Starting $APP_NAME..."
+    
+    cd "$BACKEND_DIR"
+    source venv/bin/activate
+    
+    # Create backend .env if it doesn't exist
+    if [ ! -f ".env" ]; then
+        print_status "Creating backend .env file..."
+        cat > .env << EOF
+DB_NAME=beasiswa_production
+JWT_SECRET=beasiswa-itb-secret-$(date +%s)
+CORS_ORIGINS=https://cek.itbuntuksemua.com,https://www.cek.itbuntuksemua.com,http://localhost:3000
+MONGO_URL=mongodb://localhost:27017/beasiswa_production
+EOF
+    fi
+    
+    # Start the application
+    nohup python3 -m uvicorn server:app --host 0.0.0.0 --port $APP_PORT > "$LOG_FILE" 2>&1 &
+    echo $! > "$PID_FILE"
+    
     sleep 3
-    if check_port $FRONTEND_PORT; then
-        log "Frontend started successfully on port $FRONTEND_PORT"
+    
+    if is_running; then
+        print_success "$APP_NAME started successfully (PID: $(cat $PID_FILE))"
+        print_status "Application running on port $APP_PORT"
+        print_status "Access: https://cek.itbuntuksemua.com"
+        print_status "Admin: https://cek.itbuntuksemua.com/admin"
+        print_status "API: https://cek.itbuntuksemua.com/api"
     else
-        error "Failed to start frontend"
+        print_error "Failed to start $APP_NAME"
+        cat "$LOG_FILE"
         exit 1
     fi
 }
 
-# Function to setup nginx proxy (optional)
-setup_nginx_proxy() {
-    if command -v nginx > /dev/null; then
-        log "Setting up nginx reverse proxy..."
-        cat > /tmp/beasiswa-nginx.conf << EOF
-server {
-    listen 8889;
-    server_name localhost;
-
-    # Frontend (React app)
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-
-    # Backend API
-    location /api {
-        proxy_pass http://localhost:8889;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-}
-EOF
-        info "Nginx configuration created at /tmp/beasiswa-nginx.conf"
-        info "To enable: sudo cp /tmp/beasiswa-nginx.conf /etc/nginx/sites-available/beasiswa && sudo ln -s /etc/nginx/sites-available/beasiswa /etc/nginx/sites-enabled/"
+stop_app() {
+    if ! is_running; then
+        print_warning "Application is not running"
+        return 0
     fi
-}
-
-# Function to start all services
-start_services() {
-    log "Starting Beasiswa ITB Status Checker..."
     
-    # Kill existing processes on required ports
-    kill_port $BACKEND_PORT
-    kill_port $FRONTEND_PORT
+    print_status "Stopping $APP_NAME..."
+    PID=$(cat "$PID_FILE")
+    kill "$PID"
     
-    # Setup environment
-    setup_env
+    # Wait for process to stop
+    for i in {1..10}; do
+        if ! is_running; then
+            break
+        fi
+        sleep 1
+    done
     
-    # Start MongoDB
-    start_mongodb
-    
-    # Install dependencies
-    install_dependencies
-    
-    # Start services
-    start_backend
-    start_frontend
-    
-    # Display status
-    echo ""
-    log "🎉 Beasiswa ITB Status Checker started successfully!"
-    echo ""
-    echo -e "${GREEN}📋 Service Information:${NC}"
-    echo -e "  ${BLUE}• Application URL:${NC} http://localhost:8889"
-    echo -e "  ${BLUE}• Admin Dashboard:${NC} http://localhost:8889/admin"
-    echo -e "  ${BLUE}• API Documentation:${NC} http://localhost:8889/docs"
-    echo -e "  ${BLUE}• Backend API:${NC} http://localhost:$BACKEND_PORT"
-    echo -e "  ${BLUE}• Frontend:${NC} http://localhost:$FRONTEND_PORT"
-    echo ""
-    echo -e "${GREEN}🔐 Admin Credentials:${NC}"
-    echo -e "  ${BLUE}• Username:${NC} admin"
-    echo -e "  ${BLUE}• Password:${NC} admin123"
-    echo ""
-    echo -e "${GREEN}📝 Useful Commands:${NC}"
-    echo -e "  ${BLUE}• View status:${NC} ./deploy.sh status"
-    echo -e "  ${BLUE}• View logs:${NC} ./deploy.sh logs"
-    echo -e "  ${BLUE}• Stop services:${NC} ./deploy.sh stop"
-    echo ""
-}
-
-# Function to stop all services
-stop_services() {
-    log "Stopping Beasiswa ITB Status Checker..."
-    
-    # Stop backend
-    if [ -f "backend.pid" ]; then
-        kill $(cat backend.pid) 2>/dev/null || true
-        rm -f backend.pid
+    if is_running; then
+        print_warning "Process didn't stop gracefully, forcing..."
+        kill -9 "$PID"
     fi
-    kill_port $BACKEND_PORT
     
-    # Stop frontend
-    if [ -f "frontend.pid" ]; then
-        kill $(cat frontend.pid) 2>/dev/null || true
-        rm -f frontend.pid
-    fi
-    kill_port $FRONTEND_PORT
-    
-    # Stop MongoDB (optional)
-    # stop_mongodb
-    
-    log "All services stopped"
+    rm -f "$PID_FILE"
+    print_success "$APP_NAME stopped"
 }
 
-# Function to restart services
-restart_services() {
-    log "Restarting services..."
-    stop_services
-    sleep 3
-    start_services
+is_running() {
+    [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null
 }
 
-# Function to show service status
 show_status() {
-    echo -e "${GREEN}🔍 Service Status:${NC}"
-    echo ""
-    
-    # Check MongoDB
-    if check_mongodb; then
-        echo -e "  ${GREEN}✅ MongoDB:${NC} Running"
+    if is_running; then
+        PID=$(cat "$PID_FILE")
+        print_success "$APP_NAME is running (PID: $PID)"
+        
+        # Show process info
+        if command -v ps &> /dev/null; then
+            echo "Process info:"
+            ps -p "$PID" -o pid,ppid,cpu,pmem,etime,cmd
+        fi
+        
+        # Check if port is listening
+        if command -v netstat &> /dev/null; then
+            echo "Port status:"
+            netstat -tlnp 2>/dev/null | grep ":$APP_PORT " || echo "Port $APP_PORT not found in netstat"
+        fi
+        
+        # Show recent logs
+        if [ -f "$LOG_FILE" ]; then
+            echo "Recent logs:"
+            tail -n 10 "$LOG_FILE"
+        fi
     else
-        echo -e "  ${RED}❌ MongoDB:${NC} Not running"
+        print_warning "$APP_NAME is not running"
     fi
-    
-    # Check Backend
-    if check_port $BACKEND_PORT; then
-        echo -e "  ${GREEN}✅ Backend:${NC} Running on port $BACKEND_PORT"
-    else
-        echo -e "  ${RED}❌ Backend:${NC} Not running"
-    fi
-    
-    # Check Frontend
-    if check_port $FRONTEND_PORT; then
-        echo -e "  ${GREEN}✅ Frontend:${NC} Running on port $FRONTEND_PORT"
-    else
-        echo -e "  ${RED}❌ Frontend:${NC} Not running"
-    fi
-    
-    echo ""
-    echo -e "${BLUE}📊 Process Information:${NC}"
-    ps aux | grep -E "(uvicorn|python3.*server|python3.*http.server|mongod)" | grep -v grep || echo "  No processes found"
 }
 
-# Function to show logs
 show_logs() {
-    echo -e "${GREEN}📋 Recent Logs:${NC}"
-    echo ""
-    
-    if [ -f "backend.log" ]; then
-        echo -e "${BLUE}🔗 Backend Logs (last 20 lines):${NC}"
-        tail -20 backend.log
-        echo ""
+    if [ -f "$LOG_FILE" ]; then
+        print_status "Showing logs from $LOG_FILE"
+        tail -f "$LOG_FILE"
+    else
+        print_warning "Log file not found: $LOG_FILE"
     fi
-    
-    if [ -f "frontend.log" ]; then
-        echo -e "${BLUE}🖥️  Frontend Logs (last 20 lines):${NC}"
-        tail -20 frontend.log
-        echo ""
-    fi
-    
-    echo -e "${BLUE}📁 Log files location:${NC}"
-    echo "  • Backend: $(pwd)/backend.log"
-    echo "  • Frontend: $(pwd)/frontend.log"
 }
 
-# Function to clean build and restart
-clean_restart() {
-    log "Cleaning and restarting..."
+setup_systemd() {
+    print_status "Setting up systemd service..."
     
-    stop_services
+    cat > "/tmp/${APP_NAME}.service" << EOF
+[Unit]
+Description=Beasiswa ITB Status Checker
+After=network.target mongodb.service
+Requires=mongodb.service
+
+[Service]
+Type=simple
+User=$(whoami)
+WorkingDirectory=$BACKEND_DIR
+Environment=PATH=$BACKEND_DIR/venv/bin
+ExecStart=$BACKEND_DIR/venv/bin/python -m uvicorn server:app --host 0.0.0.0 --port $APP_PORT
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    print_status "Systemd service file created at /tmp/${APP_NAME}.service"
+    print_status "To install: sudo cp /tmp/${APP_NAME}.service /etc/systemd/system/"
+    print_status "To enable: sudo systemctl enable $APP_NAME"
+    print_status "To start: sudo systemctl start $APP_NAME"
+}
+
+full_deploy() {
+    print_status "🚀 Starting full deployment..."
     
-    # Clean frontend build
-    if [ -d "frontend/build" ]; then
-        rm -rf frontend/build
+    check_dependencies
+    install_backend_deps
+    install_frontend_deps
+    build_frontend
+    
+    if is_running; then
+        stop_app
+        sleep 2
     fi
     
-    # Clean backend cache
-    if [ -d "backend/__pycache__" ]; then
-        rm -rf backend/__pycache__
-    fi
+    start_app
     
-    # Clean logs
-    rm -f backend.log frontend.log
-    
-    start_services
+    print_success "🎉 Deployment completed successfully!"
+    echo ""
+    print_status "📋 Application URLs:"
+    echo "   🌐 Main Site: https://cek.itbuntuksemua.com"
+    echo "   🔧 Admin Panel: https://cek.itbuntuksemua.com/admin"
+    echo "   📡 API Docs: https://cek.itbuntuksemua.com/docs"
+    echo ""
+    print_status "📊 Default Admin Credentials:"
+    echo "   Username: admin"
+    echo "   Password: admin123"
+}
+
+show_help() {
+    echo "Beasiswa ITB Status Checker - Deployment Script"
+    echo ""
+    echo "Usage: $0 [command]"
+    echo ""
+    echo "Commands:"
+    echo "  start     - Start the application"
+    echo "  stop      - Stop the application"
+    echo "  restart   - Restart the application"
+    echo "  status    - Show application status"
+    echo "  logs      - Show application logs"
+    echo "  build     - Build frontend only"
+    echo "  deploy    - Full deployment (install deps, build, start)"
+    echo "  systemd   - Generate systemd service file"
+    echo "  help      - Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  $0 deploy    # Full deployment"
+    echo "  $0 start     # Start application"
+    echo "  $0 logs      # View logs"
 }
 
 # Main script logic
-case "${1:-start}" in
+case "${1:-help}" in
     start)
-        start_services
+        start_app
         ;;
     stop)
-        stop_services
+        stop_app
         ;;
     restart)
-        restart_services
+        stop_app
+        sleep 2
+        start_app
         ;;
     status)
         show_status
@@ -401,23 +311,22 @@ case "${1:-start}" in
     logs)
         show_logs
         ;;
-    clean)
-        clean_restart
+    build)
+        install_frontend_deps
+        build_frontend
         ;;
-    nginx)
-        setup_nginx_proxy
+    deploy)
+        full_deploy
+        ;;
+    systemd)
+        setup_systemd
+        ;;
+    help|--help|-h)
+        show_help
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs|clean|nginx}"
-        echo ""
-        echo "Commands:"
-        echo "  start   - Start all services (default)"
-        echo "  stop    - Stop all services"
-        echo "  restart - Restart all services"
-        echo "  status  - Show service status"
-        echo "  logs    - Show recent logs"
-        echo "  clean   - Clean build and restart"
-        echo "  nginx   - Setup nginx reverse proxy config"
+        print_error "Unknown command: $1"
+        show_help
         exit 1
         ;;
 esac
