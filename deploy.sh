@@ -106,21 +106,25 @@ build_frontend() {
     cd "$FRONTEND_DIR"
     
     # Update environment for production
-    if [ ! -f ".env" ]; then
-        cat > .env << EOF
+    cat > .env << EOF
 REACT_APP_BACKEND_URL=https://cek.itbuntuksemua.com
 WDS_SOCKET_PORT=443
 GENERATE_SOURCEMAP=false
+NODE_ENV=production
+REACT_APP_NODE_ENV=production
 EOF
-    fi
+    
+    # Set production environment
+    export NODE_ENV=production
+    export REACT_APP_NODE_ENV=production
     
     # Try yarn first, then npm
     if command -v yarn &> /dev/null && [ -f "yarn.lock" ]; then
         print_status "Building with yarn..."
-        yarn build
+        NODE_ENV=production yarn build
     else
         print_status "Building with npm..."
-        npm run build
+        NODE_ENV=production npm run build
     fi
     
     print_success "Frontend built successfully"
