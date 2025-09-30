@@ -284,9 +284,24 @@ const AdminDashboard = ({ onLogout }) => {
   const [loading, setLoading] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [importLoading, setImportLoading] = useState(false);
+  const [newApplication, setNewApplication] = useState({
+    nim: '',
+    email: '',
+    nama_lengkap: '',
+    nomor_telepon: '',
+    alamat: '',
+    ipk: '',
+    penghasilan_keluarga: '',
+    essay: '',
+    dokumen_pendukung: '',
+    rekomendasi: '',
+    status: 'Dalam Review',
+    catatan: ''
+  });
   const fileInputRef = useRef(null);
 
   const token = localStorage.getItem('admin_token');
