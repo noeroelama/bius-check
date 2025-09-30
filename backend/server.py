@@ -236,11 +236,37 @@ async def admin_login(admin_data: AdminLogin):
     return {"access_token": access_token, "token_type": "bearer"}
 
 # Admin CRUD routes
-@api_router.get("/admin/applications", response_model=List[ScholarshipApplication])
-async def get_all_applications(admin: dict = Depends(get_current_admin)):
+@api_router.get("/admin/applications", response_model=dict)
+async def get_all_applications(
+    page: int = 1, 
+    limit: int = 10, 
+    admin: dict = Depends(get_current_admin)
+):
     try:
-        applications = await db.applications.find().to_list(length=None)
-        return [ScholarshipApplication(**parse_from_mongo(app)) for app in applications]
+        # Calculate skip value for pagination
+        skip = (page - 1) * limit
+        
+        # Get total count
+        total_count = await db.applications.count_documents({})
+        
+        # Get paginated applications
+        applications = await db.applications.find().skip(skip).limit(limit).to_list(length=None)
+        parsed_applications = [ScholarshipApplication(**parse_from_mongo(app)) for app in applications]
+        
+        # Calculate pagination info
+        total_pages = (total_count + limit - 1) // limit  # Ceiling division
+        
+        return {
+            "applications": parsed_applications,
+            "pagination": {
+                "current_page": page,
+                "total_pages": total_pages,
+                "total_count": total_count,
+                "limit": limit,
+                "has_next": page < total_pages,
+                "has_prev": page > 1
+            }
+        }
     except Exception as e:
         logging.error(f"Error getting applications: {e}")
         raise HTTPException(status_code=500, detail="Terjadi kesalahan internal")
