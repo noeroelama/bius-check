@@ -11,10 +11,30 @@ module.exports = {
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
-    configure: (webpackConfig) => {
+    configure: (webpackConfig, { env }) => {
+      // Production optimizations
+      if (env === 'production') {
+        // Disable source maps for production
+        webpackConfig.devtool = false;
+        
+        // Optimize for production
+        webpackConfig.optimization = {
+          ...webpackConfig.optimization,
+          splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+              vendor: {
+                test: /[\\/]node_modules[\\/]/,
+                name: 'vendors',
+                chunks: 'all',
+              },
+            },
+          },
+        };
+      }
       
       // Disable hot reload completely if environment variable is set
-      if (config.disableHotReload) {
+      if (config.disableHotReload || env === 'production') {
         // Remove hot reload related plugins
         webpackConfig.plugins = webpackConfig.plugins.filter(plugin => {
           return !(plugin.constructor.name === 'HotModuleReplacementPlugin');
