@@ -333,9 +333,37 @@ const AdminDashboard = ({ onLogout }) => {
     fetchApplications();
   }, []);
 
-  const handleEdit = (app) => {
-    setEditingApp({ ...app });
-    setIsEditDialogOpen(true);
+  const handleAdd = async () => {
+    try {
+      const applicationData = {
+        ...newApplication,
+        ipk: parseFloat(newApplication.ipk),
+        penghasilan_keluarga: parseInt(newApplication.penghasilan_keluarga)
+      };
+
+      await axios.post(`${API}/admin/applications`, applicationData, axiosConfig);
+      
+      toast.success('Aplikasi berhasil ditambahkan');
+      setIsAddDialogOpen(false);
+      setNewApplication({
+        nim: '',
+        email: '',
+        nama_lengkap: '',
+        nomor_telepon: '',
+        alamat: '',
+        ipk: '',
+        penghasilan_keluarga: '',
+        essay: '',
+        dokumen_pendukung: '',
+        rekomendasi: '',
+        status: 'Dalam Review',
+        catatan: ''
+      });
+      fetchApplications();
+    } catch (error) {
+      console.error('Error adding application:', error);
+      toast.error(error.response?.data?.detail || 'Gagal menambahkan aplikasi');
+    }
   };
 
   const handleUpdate = async () => {
