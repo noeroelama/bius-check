@@ -2,6 +2,12 @@
 
 ## Quick Setup Instructions
 
+### Prerequisites
+- Node.js 18+ or 20+ installed
+- Python 3.9+ installed
+- MongoDB installed and running
+- Git installed
+
 ### 1. aaPanel Website Setup
 1. Go to **Website** → **Add Site**
 2. Enter domain: `cek.itbuntuksemua.com`
@@ -60,6 +66,8 @@ chmod +x deploy.sh
 ./deploy.sh deploy
 ```
 
+**Note:** The deploy script automatically handles the Node.js 20 compatibility issue by installing the correct ajv version.
+
 ### 5. Application Management Commands
 
 ```bash
@@ -84,6 +92,20 @@ chmod +x deploy.sh
 # Full deployment (install deps, build, start)
 ./deploy.sh deploy
 ```
+
+## Troubleshooting Node.js Issues
+
+### If you get "Cannot find module 'ajv/dist/compile/codegen'" error:
+The deploy script automatically fixes this, but if you encounter it manually:
+
+```bash
+cd frontend
+npm install ajv@^8.11.0 --legacy-peer-deps
+```
+
+### If you get date-fns peer dependency errors:
+Already fixed in package.json, but for reference:
+- Updated `date-fns` from `^4.1.0` to `^3.6.0` for compatibility with `react-day-picker`
 
 ## URLs After Setup
 
@@ -125,6 +147,16 @@ sudo systemctl status mongod  # Check MongoDB status
 sudo systemctl start mongod   # Start MongoDB if needed
 ```
 
+### If frontend build fails with Node.js errors:
+The deploy script handles this automatically, but if needed:
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install --legacy-peer-deps
+npm install ajv@^8.11.0 --legacy-peer-deps
+npm run build
+```
+
 ### Update .env files if needed:
 - Backend: `/path/to/beasiswa-checker/backend/.env`  
 - Frontend: `/path/to/beasiswa-checker/frontend/.env`
@@ -142,5 +174,12 @@ Use aaPanel's built-in monitoring:
 1. **Website** → Your domain → **Traffic Statistics**  
 2. **System** → **System Status** (CPU, RAM, etc.)
 3. **Database** → **MongoDB** (if using aaPanel's MongoDB)
+
+## Performance Notes
+
+- React build is optimized for production
+- Static files are served directly by FastAPI
+- MongoDB queries use proper indexing
+- All dependencies are compatible with Node.js 20
 
 The application is now ready for production use! 🚀
