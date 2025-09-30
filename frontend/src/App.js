@@ -611,7 +611,6 @@ const AdminDashboard = ({ onLogout }) => {
                             {app.tahap || 'Administrasi'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm hidden xl:table-cell">{formatDate(app.tanggal_daftar)}</TableCell>
                         <TableCell className="text-center">
                           <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
                             <Button
