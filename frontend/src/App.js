@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './components/ui/button';
@@ -12,12 +12,14 @@ import { Textarea } from './components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { toast } from 'sonner';
 import { Toaster } from './components/ui/sonner';
+import { Upload, FileUp, Download, Users, CheckCircle, Clock, XCircle, Search, BookOpen } from 'lucide-react';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_beasiswa-checker/artifacts/4hwsl42m_logo.png';
 
-// Status Check Component
+// Status Check Component with Enhanced Design
 const StatusChecker = () => {
   const [nim, setNim] = useState('');
   const [email, setEmail] = useState('');
@@ -50,9 +52,17 @@ const StatusChecker = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Diterima': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Ditolak': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Diterima': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'Ditolak': return 'bg-rose-100 text-rose-800 border-rose-200';
+      default: return 'bg-amber-100 text-amber-800 border-amber-200';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'Diterima': return <CheckCircle className="w-5 h-5" />;
+      case 'Ditolak': return <XCircle className="w-5 h-5" />;
+      default: return <Clock className="w-5 h-5" />;
     }
   };
 
@@ -66,55 +76,113 @@ const StatusChecker = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Cek Status Beasiswa
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Beasiswa ITB Untuk Semua - Periksa status aplikasi beasiswa Anda
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-purple-600/90"></div>
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
         </div>
+        
+        <div className="relative container mx-auto px-4 py-16">
+          <div className="flex flex-col items-center text-center text-white">
+            {/* Logo */}
+            <div className="mb-6">
+              <img 
+                src={LOGO_URL} 
+                alt="ITB untuk Semua" 
+                className="h-20 w-auto mx-auto drop-shadow-lg"
+              />
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+              Cek Status Beasiswa
+            </h1>
+            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+              Beasiswa ITB Untuk Semua - Periksa status aplikasi beasiswa Anda dengan mudah
+            </p>
+            
+            {/* Decorative Elements */}
+            <div className="flex space-x-4 mt-8 text-blue-200">
+              <div className="flex items-center space-x-2">
+                <BookOpen className="w-5 h-5" />
+                <span className="text-sm">Mudah Digunakan</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Search className="w-5 h-5" />
+                <span className="text-sm">Pencarian Cepat</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5" />
+                <span className="text-sm">Hasil Akurat</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Wave decoration */}
+        <div className="absolute bottom-0 left-0 w-full">
+          <svg className="w-full h-20 text-blue-50" fill="currentColor" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+          </svg>
+        </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="container mx-auto px-4 -mt-12 relative z-10">
         {/* Status Check Form */}
-        <div className="max-w-md mx-auto mb-8">
-          <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-gray-800">Periksa Status</CardTitle>
-              <CardDescription>
+        <div className="max-w-md mx-auto mb-12">
+          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+            <CardHeader className="text-center pb-6">
+              <CardTitle className="text-2xl text-gray-800 flex items-center justify-center gap-2">
+                <Search className="w-6 h-6 text-blue-600" />
+                Periksa Status
+              </CardTitle>
+              <CardDescription className="text-base text-gray-600">
                 Masukkan NIM dan Email yang terdaftar
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Nomor Induk Mahasiswa (NIM)</label>
                 <Input
                   type="text"
-                  placeholder="Nomor Induk Mahasiswa (NIM)"
+                  placeholder="Contoh: 13523001"
                   value={nim}
                   onChange={(e) => setNim(e.target.value)}
                   data-testid="nim-input"
-                  className="h-12 text-base"
+                  className="h-12 text-base border-2 focus:border-blue-500 transition-colors"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Email Terdaftar</label>
                 <Input
                   type="email"
-                  placeholder="Email terdaftar"
+                  placeholder="email@students.itb.ac.id"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   data-testid="email-input"
-                  className="h-12 text-base"
+                  className="h-12 text-base border-2 focus:border-blue-500 transition-colors"
                 />
               </div>
               <Button
                 onClick={checkStatus}
                 disabled={loading}
                 data-testid="check-status-btn"
-                className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full h-12 text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                {loading ? 'Memeriksa...' : 'Periksa Status'}
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Memeriksa...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-5 h-5 mr-2" />
+                    Periksa Status
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -122,57 +190,118 @@ const StatusChecker = () => {
 
         {/* Results */}
         {result && (
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto mb-12">
             {result.found ? (
-              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm" data-testid="status-result">
+              <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm" data-testid="status-result">
                 <CardHeader>
-                  <CardTitle className="text-xl text-gray-800">Status Aplikasi</CardTitle>
+                  <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
+                    <Users className="w-6 h-6 text-blue-600" />
+                    Status Aplikasi Beasiswa
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600">NIM</p>
-                      <p className="font-medium text-gray-900">{result.nim}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Nama Lengkap</p>
-                      <p className="font-medium text-gray-900">{result.nama_lengkap}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Status</p>
-                      <Badge className={`${getStatusColor(result.status)} font-medium`} data-testid="status-badge">
-                        {result.status}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Tanggal Daftar</p>
-                      <p className="font-medium text-gray-900">{formatDate(result.tanggal_daftar)}</p>
-                    </div>
-                    <div className="md:col-span-2">
-                      <p className="text-sm text-gray-600">Tanggal Update Terakhir</p>
-                      <p className="font-medium text-gray-900">{formatDate(result.tanggal_update)}</p>
+                <CardContent className="space-y-6">
+                  {/* Status Badge */}
+                  <div className="flex items-center justify-center py-4">
+                    <div className={`flex items-center gap-3 px-6 py-3 rounded-full ${getStatusColor(result.status)} border-2`} data-testid="status-badge">
+                      {getStatusIcon(result.status)}
+                      <span className="font-bold text-lg">{result.status}</span>
                     </div>
                   </div>
+                  
+                  {/* Details Grid */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-600">NIM</p>
+                      <p className="font-mono text-lg font-bold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{result.nim}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-600">Nama Lengkap</p>
+                      <p className="text-lg font-semibold text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{result.nama_lengkap}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-600">Tanggal Daftar</p>
+                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{formatDate(result.tanggal_daftar)}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-600">Update Terakhir</p>
+                      <p className="text-base text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{formatDate(result.tanggal_update)}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Notes */}
                   {result.catatan && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">Catatan</p>
-                      <p className="text-gray-800" data-testid="status-notes">{result.catatan}</p>
+                    <div className="mt-6">
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0">
+                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                              <BookOpen className="w-4 h-4 text-white" />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-blue-900 mb-1">Catatan</p>
+                            <p className="text-blue-800 leading-relaxed" data-testid="status-notes">{result.catatan}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ) : (
-              <Card className="shadow-lg border-0 bg-red-50 border-red-200">
-                <CardContent className="p-6 text-center">
-                  <p className="text-red-800 font-medium">Data tidak ditemukan</p>
-                  <p className="text-red-600 text-sm mt-2">
-                    Periksa kembali NIM dan Email yang Anda masukkan
-                  </p>
+              <Card className="shadow-2xl border-0 bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+                <CardContent className="p-8 text-center">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                      <XCircle className="w-8 h-8 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-red-800 font-bold text-lg mb-2">Data tidak ditemukan</p>
+                      <p className="text-red-600 text-base">
+                        Periksa kembali NIM dan Email yang Anda masukkan
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
           </div>
         )}
+
+        {/* Info Section */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="text-center border-0 bg-white/70 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">Pencarian Mudah</h3>
+                <p className="text-sm text-gray-600">Masukkan NIM dan email untuk mengecek status beasiswa Anda</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center border-0 bg-white/70 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">Hasil Akurat</h3>
+                <p className="text-sm text-gray-600">Informasi status terkini langsung dari database ITB</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="text-center border-0 bg-white/70 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">Informasi Lengkap</h3>
+                <p className="text-sm text-gray-600">Status, tanggal, dan catatan penting untuk aplikasi Anda</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -210,8 +339,9 @@ const AdminLogin = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-100 flex items-center justify-center">
-      <Card className="w-full max-w-md shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+        <CardHeader className="text-center pb-6">
+          <img src={LOGO_URL} alt="ITB untuk Semua" className="h-16 w-auto mx-auto mb-4" />
           <CardTitle className="text-2xl text-gray-800">Admin Login</CardTitle>
           <CardDescription>
             Masuk ke dashboard admin beasiswa
@@ -258,6 +388,10 @@ const AdminDashboard = ({ onLogout }) => {
   const [loading, setLoading] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importLoading, setImportLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const token = localStorage.getItem('admin_token');
   const axiosConfig = {
@@ -325,17 +459,84 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
+  const handleImportCSV = async () => {
+    if (!importFile) {
+      toast.error('Pilih file CSV terlebih dahulu');
+      return;
+    }
+
+    setImportLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', importFile);
+
+      const response = await axios.post(`${API}/admin/import-csv`, formData, {
+        ...axiosConfig,
+        headers: {
+          ...axiosConfig.headers,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const result = response.data;
+      if (result.success) {
+        toast.success(result.message);
+        if (result.errors.length > 0) {
+          console.log('Import errors:', result.errors);
+        }
+        fetchApplications();
+      } else {
+        toast.error('Gagal mengimpor data');
+      }
+
+      setIsImportDialogOpen(false);
+      setImportFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error importing CSV:', error);
+      toast.error('Gagal mengimpor file CSV');
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
+  const downloadSampleCSV = () => {
+    const sampleData = [
+      {
+        nim: '13523001',
+        email: 'contoh@students.itb.ac.id',
+        nama_lengkap: 'Contoh Nama Lengkap',
+        nomor_telepon: '081234567890',
+        alamat: 'Jl. Contoh No. 123, Bandung',
+        ipk: '3.75',
+        penghasilan_keluarga: '5000000',
+        essay: 'Essay singkat tentang motivasi beasiswa',
+        dokumen_pendukung: 'KTM, KK, Slip Gaji',
+        rekomendasi: 'Surat rekomendasi dosen',
+        status: 'Dalam Review',
+        catatan: 'Catatan opsional'
+      }
+    ];
+
+    const csvContent = [
+      Object.keys(sampleData[0]).join(','),
+      ...sampleData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sample_beasiswa_import.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('id-ID');
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
   };
 
   const getStatusColor = (status) => {
@@ -352,7 +553,10 @@ const AdminDashboard = ({ onLogout }) => {
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard Admin Beasiswa</h1>
+            <div className="flex items-center space-x-4">
+              <img src={LOGO_URL} alt="ITB untuk Semua" className="h-10 w-auto" />
+              <h1 className="text-2xl font-bold text-gray-900">Dashboard Admin Beasiswa</h1>
+            </div>
             <Button
               onClick={onLogout}
               variant="outline"
@@ -370,14 +574,24 @@ const AdminDashboard = ({ onLogout }) => {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-800">Daftar Aplikasi Beasiswa</h2>
-            <Button
-              onClick={fetchApplications}
-              disabled={loading}
-              data-testid="refresh-applications-btn"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {loading ? 'Memuat...' : 'Refresh Data'}
-            </Button>
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => setIsImportDialogOpen(true)}
+                data-testid="import-csv-btn"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import CSV
+              </Button>
+              <Button
+                onClick={fetchApplications}
+                disabled={loading}
+                data-testid="refresh-applications-btn"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {loading ? 'Memuat...' : 'Refresh Data'}
+              </Button>
+            </div>
           </div>
 
           {/* Applications Table */}
@@ -500,6 +714,87 @@ const AdminDashboard = ({ onLogout }) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Import CSV Dialog */}
+      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Data CSV</DialogTitle>
+            <DialogDescription>
+              Upload file CSV untuk mengimpor data aplikasi beasiswa
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">File CSV</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={(e) => setImportFile(e.target.files[0])}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-testid="csv-file-input"
+              />
+              {importFile && (
+                <p className="text-sm text-green-600 mt-1">
+                  File dipilih: {importFile.name}
+                </p>
+              )}
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-blue-900 mb-2">Format CSV yang Diperlukan:</h4>
+              <p className="text-xs text-blue-800 mb-2">
+                File CSV harus memiliki kolom: nim, email, nama_lengkap, nomor_telepon, alamat, ipk, penghasilan_keluarga, essay, dokumen_pendukung, rekomendasi, status, catatan
+              </p>
+              <Button
+                onClick={downloadSampleCSV}
+                variant="outline"
+                size="sm"
+                data-testid="download-sample-btn"
+                className="text-blue-700 border-blue-300 hover:bg-blue-100"
+              >
+                <Download className="w-4 h-4 mr-1" />
+                Unduh Contoh CSV
+              </Button>
+            </div>
+            
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsImportDialogOpen(false);
+                  setImportFile(null);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                  }
+                }}
+                data-testid="cancel-import-btn"
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={handleImportCSV}
+                disabled={!importFile || importLoading}
+                data-testid="confirm-import-btn"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {importLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Mengimpor...
+                  </>
+                ) : (
+                  <>
+                    <FileUp className="w-4 h-4 mr-2" />
+                    Import
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -544,7 +839,7 @@ function App() {
                       onClick={() => setCurrentView('admin')}
                       variant="outline"
                       data-testid="go-to-admin-btn"
-                      className="bg-white/80 backdrop-blur-sm border-gray-300 text-gray-700 hover:bg-gray-50"
+                      className="bg-white/90 backdrop-blur-sm border-gray-300 text-gray-700 hover:bg-gray-50 shadow-lg"
                     >
                       Admin
                     </Button>
@@ -553,7 +848,7 @@ function App() {
                       onClick={() => setCurrentView('public')}
                       variant="outline"
                       data-testid="back-to-public-btn"
-                      className="bg-white/80 backdrop-blur-sm border-gray-300 text-gray-700 hover:bg-gray-50"
+                      className="bg-white/90 backdrop-blur-sm border-gray-300 text-gray-700 hover:bg-gray-50 shadow-lg"
                     >
                       Kembali
                     </Button>

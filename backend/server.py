@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -12,6 +12,8 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import jwt
 import hashlib
+import csv
+import io
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -20,8 +22,6 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
-
-import hashlib
 
 # Security
 security = HTTPBearer()
@@ -104,6 +104,12 @@ class Admin(BaseModel):
     hashed_password: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class ImportResult(BaseModel):
+    success: bool
+    imported_count: int
+    errors: List[str]
+    message: str
+
 # Helper functions
 def prepare_for_mongo(data):
     """Convert datetime objects to ISO strings for MongoDB storage"""
@@ -158,6 +164,26 @@ async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(
     if admin is None:
         raise credentials_exception
     return admin
+
+def parse_csv_row(row):
+    """Parse a CSV row into a scholarship application"""
+    try:
+        return {
+            "nim": str(row.get("nim", "")).strip(),
+            "email": str(row.get("email", "")).strip(),
+            "nama_lengkap": str(row.get("nama_lengkap", "")).strip(),
+            "nomor_telepon": str(row.get("nomor_telepon", "")).strip(),
+            "alamat": str(row.get("alamat", "")).strip(),
+            "ipk": float(row.get("ipk", 0)),
+            "penghasilan_keluarga": int(row.get("penghasilan_keluarga", 0)),
+            "essay": str(row.get("essay", "")).strip(),
+            "dokumen_pendukung": str(row.get("dokumen_pendukung", "")).strip() or None,
+            "rekomendasi": str(row.get("rekomendasi", "")).strip() or None,
+            "status": str(row.get("status", "Dalam Review")).strip(),
+            "catatan": str(row.get("catatan", "")).strip() or None,
+        }
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid data in row: {e}")
 
 # Routes
 @api_router.get("/")
@@ -291,6 +317,63 @@ async def delete_application(app_id: str, admin: dict = Depends(get_current_admi
     except Exception as e:
         logging.error(f"Error deleting application: {e}")
         raise HTTPException(status_code=500, detail="Terjadi kesalahan internal")
+
+# CSV Import route
+@api_router.post("/admin/import-csv", response_model=ImportResult)
+async def import_applications_csv(file: UploadFile = File(...), admin: dict = Depends(get_current_admin)):
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="File harus berformat CSV")
+    
+    try:
+        # Read CSV content
+        content = await file.read()
+        csv_content = content.decode('utf-8')
+        
+        # Parse CSV
+        csv_reader = csv.DictReader(io.StringIO(csv_content))
+        
+        imported_count = 0
+        errors = []
+        
+        for row_num, row in enumerate(csv_reader, start=2):  # Start from 2 because row 1 is header
+            try:
+                # Parse row data
+                app_data = parse_csv_row(row)
+                
+                # Validate required fields
+                if not all([app_data["nim"], app_data["email"], app_data["nama_lengkap"]]):
+                    errors.append(f"Baris {row_num}: NIM, email, dan nama_lengkap harus diisi")
+                    continue
+                
+                # Check if NIM already exists
+                existing = await db.applications.find_one({"nim": app_data["nim"]})
+                if existing:
+                    errors.append(f"Baris {row_num}: NIM {app_data['nim']} sudah terdaftar")
+                    continue
+                
+                # Create application object
+                app_obj = ScholarshipApplication(**app_data)
+                app_mongo_data = prepare_for_mongo(app_obj.dict())
+                
+                # Insert into database
+                await db.applications.insert_one(app_mongo_data)
+                imported_count += 1
+                
+            except ValueError as e:
+                errors.append(f"Baris {row_num}: {str(e)}")
+            except Exception as e:
+                errors.append(f"Baris {row_num}: Kesalahan tidak terduga - {str(e)}")
+        
+        return ImportResult(
+            success=imported_count > 0,
+            imported_count=imported_count,
+            errors=errors,
+            message=f"Berhasil mengimpor {imported_count} aplikasi. {len(errors)} error ditemukan."
+        )
+    
+    except Exception as e:
+        logging.error(f"Error importing CSV: {e}")
+        raise HTTPException(status_code=500, detail="Gagal memproses file CSV")
 
 # Include the router in the main app
 app.include_router(api_router)
