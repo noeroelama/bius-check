@@ -17,7 +17,7 @@ import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_beasiswa-checker/artifacts/4hwsl42m_logo.png';
+const LOGO_URL = '/logo.png';
 
 // Status Check Component with Enhanced Design
 const StatusChecker = () => {
